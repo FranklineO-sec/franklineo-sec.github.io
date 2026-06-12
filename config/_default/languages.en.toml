@@ -8,14 +8,14 @@ title = "Frankline's Terminal Insights"
   isoCode = "en"
   rtl = false
   dateFormat = "2 January 2006"
-  logo = "/images/avatar.png"
-  secondaryLogo = "static/images/avatar.png"
+  logo = "static/img/avatar1.png"
+  secondaryLogo = "static/img/avatar1.png"
   description = "Practical cybersecurity writeups, forensic investigations, attack simulations, and hands-on security research with a focus on methodology, tools, and real-world application."
   copyright = "© 2026 FranklineOsec. All rights reserved."
 
 [author]
   name = "FranklineO-sec"
-  image = "/images/avatar.png"
+  image = "static/img/avatar1.png"
   headline = "Cybersecurity Analyst | CTF Player"
   bio = "Exploring cybersecurity through CTFs, digital forensics, and practical security research."
   links = [
