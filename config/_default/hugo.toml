@@ -1,7 +1,7 @@
 baseURL = "https://github.com/FranklineO-sec/terminal"
 languageCode = "en"
 defaultContentLanguage = "en"
-title = "HushKat's Cyber Den"
+title = "Franklines Terminal Insights"
 theme = "blowfish"
 disableLanguages = ["it", "ja", "zh-cn"] # Keep only English
 
