@@ -1,16 +1,26 @@
 ---
-title: "Welcome to HushKat's Cyber Den"
-description: "Join me on an exciting journey through the world of cybersecurity, CTF challenges, and ethical hacking."
+title: "Welcome"
+description: "Cybersecurity writeups, forensic investigations, and practical security research."
 ---
 
-## Welcome to My Cybersecurity Journey
+# Explore Cybersecurity Through Practice
 
-Hey there, fellow security enthusiasts! I'm **HushKat**, and this is my digital playground where I share everything I learn in the fascinating world of cybersecurity. From CTF writeups to deep dives into digital forensics, this is where curiosity meets code-breaking.
+This site documents CTF writeups, digital forensics investigations, penetration testing notes, and security research. Each post focuses on the tools, techniques, and methodology used to solve security challenges and analyze systems.
 
-Ready to see what this journey is all about? Check out one of my latest videos:
+Whether you're building foundational skills, preparing for certifications, or expanding your practical experience, you'll find detailed walkthroughs and technical insights designed to support continuous learning.
 
-{{< youtubeLite id="HBDgApbgR40" label="Welcome to HushKat's Cyber Den" >}}
+## What You'll Find Here
 
-Whether you're a seasoned pro or just starting out like I once was, there's something here for everyone. Dive into my [latest posts](/posts/), explore different [categories](/categories/), or learn more [about me](/about/) and this blog's mission.
+- CTF writeups and challenge solutions
+- Digital forensics investigations
+- Penetration testing notes and labs
+- Security tools and techniques
+- Research findings and lessons learned
 
-**Happy hacking!**
+## Start Exploring
+
+- [Latest Posts](/posts/)
+- [Categories](/categories/)
+- [About Me](/about/)
+
+> Learn. Analyze. Secure.
