@@ -10,18 +10,17 @@ title = "Frankline's Terminal Insights"
   dateFormat = "2 January 2006"
   logo = "/images/avatar.png"
   secondaryLogo = "static/images/avatar.png"
-  description = "Cybersecurity enthusiast sharing CTF writeups, tutorials, and security insights"
-  copyright = "© 2026 HushKat. All rights reserved."
+  description = "Practical cybersecurity writeups, forensic investigations, attack simulations, and hands-on security research with a focus on methodology, tools, and real-world application."
+  copyright = "© 2026 FranklineOsec. All rights reserved."
 
 [author]
-  name = "HushKat"
+  name = "FranklineO-sec"
   image = "/images/avatar.png"
-  headline = "Cybersecurity Enthusiast & CTF Player"
-  bio = "Passionate about cybersecurity analysis, and ethical hacking. Sharing knowledge through CTF writeups and tutorials."
+  headline = "Cybersecurity Analyst | CTF Player"
+  bio = "Exploring cybersecurity through CTFs, digital forensics, and practical security research."
   links = [
-    { email = "samykat46@gmail.com" },
-    { link = "https://hushkat.github.io" },
-    { github = "https://github.com/hushkat" },
-    { linkedin = "https://www.linkedin.com/in/katanasamuel/" },
-    { twitter = "https://x.com/dr0idbot" },
+    { email = "franc.otieno22@gmail.com" },
+    { link = "https://franklineo-sec.github.io/" },
+    { github = "https://github.com/FranklineO-sec" },
+    { linkedin = "https://www.linkedin.com/in/frankline-otieno" },
   ]
