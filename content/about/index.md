@@ -10,7 +10,7 @@ showTableOfContents: true
 showWordCount: false
 ---
 
-![Frankline's Terminal Insights](/about/img/about-1.jpg "Frankline's Terminal Insights")
+![Frankline's Terminal Insights](/about/img/about-2.jpg "Frankline's Terminal Insights")
 
 {{< alert "circle-info" >}}
 **Frankline's Terminal Insights** — Practical cybersecurity research, digital forensics, and hands-on security learning.
