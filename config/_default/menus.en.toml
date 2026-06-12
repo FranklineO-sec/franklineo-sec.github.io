@@ -31,14 +31,14 @@
   pageRef = "about"
   weight = 40
 
-[[main]]
-  identifier = "twitter"
-  pre = "x-twitter"
-  url = "https://twitter.com/dr0idbot"
-  weight = 200
+#[[main]]
+ # identifier = "twitter"
+ # pre = "x-twitter"
+ # url = "https://twitter.com/dr0idbot"
+ # weight = 200
 
 [[main]]
   identifier = "github"
   pre = "github"
-  url = "https://github.com/hushkat"
+  url = "https://github.com/FranklineO-sec"
   weight = 400
