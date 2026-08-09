@@ -39,7 +39,7 @@ user1@target-box:~$ ls -la /home
 drwxr-xr-x  2 user1 user1 4096 Aug  9 12:00 user1
 drwxr-x---  2 user2 user2 4096 Aug  9 12:00 user2
 ```
-Attempting to read `user2's home directory contents directly results in a standard Linux file permission error (`Permission denied`). This sets our immediate objective: find a path to transition horizontally from `user1` to `user2`.
+Attempting to read `user2's` home directory contents directly results in a standard Linux file permission error (`Permission denied`). This sets our immediate objective: find a path to transition horizontally from `user1` to `user2`.
 
 ## Phase 2: Auditing Sudo Privileges & Lateral Movement
 To check what administrative commands our current user can run, we execute:
