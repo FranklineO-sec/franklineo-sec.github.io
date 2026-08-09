@@ -12,7 +12,7 @@ featureimage: "https://t3.ftcdn.net/jpg/03/68/72/50/240_F_368725089_Pm6rqgl9PY4f
 
 Attacktive Directory is a Windows Active Directory box on TryHackMe that walks through a full AD attack chain from unauthenticated enumeration to Domain Admin. I used `enum4linux` and `kerbrute` to enumerate valid domain users, performed AS-REP Roasting against a Kerberos pre-authentication–disabled account to grab a crackable hash, pivoted through an exposed SMB share to recover plaintext credentials, and finished by dumping the NTDS.dit database via DRSUAPI to obtain the Administrator's NTLM hash, then used Pass-the-Hash with Evil-WinRM to get a shell as Domain Admin.
 
-> **Disclaimer:** This writeup documents a room completed on [TryHackMe](https://tryhackme.com/room/attacktivedirectory) shared strictly for **educational purposes** — to document my learning process and demonstrate my understanding of Active Directory attack techniques. All activity was performed in an isolated, intentionally vulnerable lab environment with explicit authorization from the platform.
+> **Disclaimer:** This writeup is strictly for **educational purposes** and to document my learning process and demonstrate my understanding of Active Directory attack techniques. All activity was performed in an isolated, intentionally vulnerable lab environment with explicit authorization from the platform.
 
 ## Phase 1: Environment Setup
 
