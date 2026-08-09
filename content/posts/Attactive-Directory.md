@@ -1,5 +1,5 @@
 ---
-title: "Attacktive Directory — TryHackMe Writeup"
+title: "Attacktive Directory"
 date: 2026-08-09
 draft: false
 tags: ["Active Directory", "Kerberos", "Windows", "TryHackMe", "Pentesting"]
@@ -26,6 +26,7 @@ git clone https://github.com/SecureAuthCorp/impacket.git /opt/impacket
 pip3 install -r /opt/impacket/requirements.txt
 
 apt install bloodhound neo4j
+```
 
 ## Phase 2: Initial Reconnaissance 
 
@@ -110,7 +111,7 @@ Domain Sid: S-1-5-21-3591857110-2884097990-301047963
 
 This confirmed the host was part of a domain (not a workgroup) and returned the **NetBIOS domain name: `THM-AD`**. It's worth noting that `.local` is a commonly (and incorrectly) used TLD for internal AD domains — a detail that's often useful for identifying AD environments during recon on a wider network.
 
-## Phase 4: Enumerating Users via Kerberos
+## Phase 3: Enumerating Users via Kerberos
 
 With a domain name in hand, I moved on to user enumeration using `kerbrute`, which abuses Kerberos pre-authentication responses to validate usernames without triggering account lockouts the way SMB/LDAP brute-forcing might.
 
@@ -140,7 +141,7 @@ Version: v1.0.3 (9dad6e1) - 10/30/25 - Ronnie Flathers @ropnop
 
 This returned a list of valid usernames, including standard accounts like `james`, `robin`, and `administrator` — but two accounts stood out immediately as high-value targets: **`svc-admin`** and **`backup`**. Service accounts and accounts with "backup" in the name are classic AD misconfiguration red flags, often over-privileged or configured with weak/static passwords.
 
-## Phase 5: Abusing Kerberos — AS-REP Roasting
+## Phase 4: Abusing Kerberos — AS-REP Roasting
 
 Some accounts can be configured with Kerberos pre-authentication disabled — meaning anyone can request a ticket for that account without proving they know its password first. This is AS-REP Roasting. I checked `svc-admin` and confirmed it could be queried without a password:
 
@@ -199,7 +200,7 @@ Optimizers applied:
 
 This recovered the plaintext password for `svc-admin` (`management2005`), giving me a foothold set of valid domain credentials.
 
-## Phase 6: SMB Share Enumeration
+## Phase 5: SMB Share Enumeration
 
 With valid credentials, I moved to enumerating SMB shares using `smbclient`. First, I added the domain to my local hosts file to resolve it properly:
 
@@ -259,7 +260,7 @@ backup@spookysec.local:backup2517860
 
 This is a good real-world lesson: credentials left in plaintext (even encoded) on accessible shares are a common and serious misconfiguration in production AD environments.
 
-## Phase 7: Elevating Privileges — Dumping NTDS.dit
+## Phase 6: Elevating Privileges — Dumping NTDS.dit
 
 The `backup` account, by design in many AD environments, often holds replication rights that allow it to perform a **DCSync** attack — impersonating a Domain Controller to request password data via the **DRSUAPI** method. Using Impacket's `secretsdump.py` with the recovered `backup` credentials, I dumped the domain's NTDS.dit database remotely:
 
@@ -284,7 +285,7 @@ spookysec.local\optional:1106:aad3b435b51404eeaad3b435b51404ee:436007d1c1550eaf4
 
 This returned NTLM hashes for every domain account, including the **Administrator** account (`0e0363213e37b94221497260b0bcb4fc`) — full domain compromise.
 
-## Phase 8: Domain Compromise — Pass-the-Hash
+## Phase 7: Domain Compromise — Pass-the-Hash
 
 With the Administrator's NTLM hash in hand, I didn't need the plaintext password at all. I used **Evil-WinRM**'s `-H` flag to authenticate via **Pass-the-Hash**, a technique that lets an attacker authenticate using the hash directly rather than cracking it first:
 
@@ -302,7 +303,7 @@ thm-ad\administrator
 
 This dropped me into a shell as `thm-ad\administrator` — full Domain Admin access.
 
-## Phase 9: Flag Capture
+## Phase 8: Flag Capture
 
 Flags were located on each compromised user's desktop and retrieved via `cat` over the Evil-WinRM session:
 
@@ -358,7 +359,7 @@ Mode                LastWriteTime         Length Name
 - `backup` — Privilege escalation flag: `[REDACTED]`
 - `Administrator` — Domain Admin flag: `[REDACTED]`
 
-## Phase 10: Key Takeaways
+## Phase 8: Key Takeaways
 
 This room tied together an end-to-end AD attack chain that mirrors real-world engagements:
 
