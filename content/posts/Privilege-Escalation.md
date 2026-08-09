@@ -39,7 +39,7 @@ user1@target-box:~$ ls -la /home
 drwxr-xr-x  2 user1 user1 4096 Aug  9 12:00 user1
 drwxr-x---  2 user2 user2 4096 Aug  9 12:00 user2
 ```
-Attempting to read `user2's home directory contents directly results in a standard Linux file permission error (`Permission denied). This sets our immediate objective: find a path to transition horizontally from `user1 to `user2.
+Attempting to read `user2's home directory contents directly results in a standard Linux file permission error (`Permission denied`). This sets our immediate objective: find a path to transition horizontally from `user1` to `user2`.
 
 ## Phase 2: Auditing Sudo Privileges & Lateral Movement
 To check what administrative commands our current user can run, we execute:
@@ -54,13 +54,13 @@ User user1 may run the following commands on target-box:
 ```
 This configuration presents a critical misconfiguration:
 
-(user2 : user2): Grants user1 the ability to run the specified binary under the explicit context of user2.
+(user2 : user2): Grants user1 the ability to run the specified binary under the explicit context of `user2`.
 
-NOPASSWD: Suppresses the requirement to enter user1's password upon execution.
+`NOPASSWD`: Suppresses the requirement to enter user1's password upon execution.
 
-/bin/bash: Grants access to launch an unrestricted, interactive shell binary.
+`/bin/bash`: Grants access to launch an unrestricted, interactive shell binary.
 
-Because `/bin/bash is allowed directly without restriction, we can spawn a new interactive shell session as user2:
+Because `/bin/bash` is allowed directly without restriction, we can spawn a new interactive shell session as `user2`:
 
 ```
 sudo -u user2 /bin/bash
@@ -71,12 +71,12 @@ Verifying our session identity confirms successful lateral movement:
 user2@target-box:~$ id
 uid=1001(user2) gid=1001(user2) groups=1001(user2)
 ```
-With `user2 privilege established, we can read the user flag located in `/home/user2/flag.txt.
+With `user2` privilege established, we can read the user flag located in `/home/user2/flag.txt`.
 
 ## Phase 3: Enumerating the Root Environment
-Now that we have escalated to user2, we pivot our attention toward acquiring root privileges. Standard enumeration includes inspecting administrative user directories and configuration files.
+Now that we have escalated to `user2`, we pivot our attention toward acquiring root privileges. Standard enumeration includes inspecting administrative user directories and configuration files.
 
-Navigating to /root demonstrates that the directory itself is listable or accessible under our current context:
+Navigating to `/root` demonstrates that the directory itself is listable or accessible under our current context:
 
 ```
 cd /root
@@ -87,18 +87,18 @@ drwxr-xr-x 1 root root 4096 Aug  9 12:00 ..
 -rw------- 1 root root  111 Aug  9 12:00 flag.txt
 drwxr-xr-x 2 root root 4096 Aug  9 12:00 .ssh
 ```
-While `flag.txt remains unreadable due to strict standard permissions, the hidden `.ssh directory catches our attention.
+While `flag.txt` remains unreadable due to strict standard permissions, the hidden `.ssh directory` catches our attention.
 
 ## Phase 4: Exploiting Exposed SSH Key Credentials
-Checking the permissions and contents of `/root/.ssh:
+Checking the permissions and contents of `/root/.ssh`:
 
 ```
 cd /root/.ssh
 ls -la
 ```
 
-`-rw-r--r-- 1 root root 2602 Aug  9 12:00 id_rsa
-The file `id_rsa contains an OpenSSH Private Key belonging to the root account. Private keys should never be globally readable or exposed across privilege boundaries.
+`-rw-r--r-- 1 root root 2602 Aug  9 12:00 id_rsa`
+The file `id_rsa` contains an OpenSSH Private Key belonging to the root account. Private keys should never be globally readable or exposed across privilege boundaries.
 
 ```
 cat id_rsa
@@ -118,7 +118,7 @@ QfPM8OxSjcVJCpAAAAEXJvb3RANzZkOTFmZTVjMjcwAQ==
 
 ```
 ## Phase 5: Solution/Flag
-I copy the key to my local machine in a file named `id_rsa and save it,  then try to use it to log in as the root user using the commands:
+I copy the key to my local machine in a file named `id_rsa` and save it,  then try to use it to log in as the root user using the commands:
 
 ```
 ──(papab3ar㉿kali)-[~]
