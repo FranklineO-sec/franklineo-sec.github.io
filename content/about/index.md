@@ -10,7 +10,7 @@ showTableOfContents: true
 showWordCount: false
 ---
 
-![Frankline's Terminal Insights](/about/img/about1.webp "Frankline's Terminal Insights")
+![Frankline's Terminal Insights](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQnUC89w3qXTqHEAj769aLlUiSYSo00qzkd5jp9TX_uOQ&s=10)
 
 {{< alert "circle-info" >}}
 **Frankline's Terminal Insights** — Practical cybersecurity research, digital forensics, and hands-on security learning.
