@@ -4,8 +4,7 @@ date: 2026-08-20
 draft: false
 tags: ["Incident Response", "Wireshark", "Cobalt Strike", "Malware Analysis", "TryHackMe"]
 categories: ["Incident Reports"]
-featureimage: "https://cdn-images.tryhackme.com/room-icons/6ba48271aa3457f8488e1029031ed058.png
-"
+featureimage: "https://cdn-images.tryhackme.com/room-icons/6ba48271aa3457f8488e1029031ed058.png"
 ---
 > **Note:** This report is based on TryHackMe's [Carnage](https://tryhackme.com/room/c2carnage) room. It's written in the format of a real incident report for practice, but the underlying traffic is a training packet capture, not a live incident on a real network.
 
