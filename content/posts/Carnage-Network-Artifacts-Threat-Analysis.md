@@ -50,7 +50,7 @@ The interesting part came next. Using Wireshark's Conversations view filtered to
 
 After the C2 connection was established, I filtered specifically for `http.request.method == POST` to catch anything the infected host was sending *out*, since that's usually more telling than what it's pulling in. That surfaced traffic to `maldivehost.net`, starting with a POST request carrying what looks like base64-encoded data, consistent with either ongoing check-in beacons or the attacker pulling data off the machine. I also caught the malware querying `api.ipify.org`, a public IP-lookup service, at 17:00:04 UTC. This is the malware doing basic reconnaissance on its own host, likely to report the victim's public IP address back to the attacker or to decide whether to proceed further.
 
-### 4.5 The Spam Traffic — A Loose End
+### 4.5 The Spam Traffic (A Loose End)
 
 Finally, filtering on `smtp` turned up something that at first looked connected to the same infection but, on closer inspection, wasn't tied to any of the C2 or download traffic I'd already found a batch of outbound spam email, starting with a MAIL FROM address of `farshin@mailfa.com`. I want to flag this honestly as a loose end rather than force a connection that isn't there: it's possible this is a second, unrelated compromise on the same network segment, or the capture simply includes background noise from another source. Either way, it's worth someone with mail security access taking a look, even though I can't tie it directly to the Cobalt Strike infection above.
 
@@ -83,10 +83,10 @@ No file hashes are included here. I only had network traffic to work with, not t
 
 **In the next hour:**
 
-1. **Isolate `10.9.23.102`** from the network immediately if it hasn't already been pulled — don't power it off, just cut its network access, so a proper forensic image can still be taken later.
+1. **Isolate `10.9.23.102`** from the network immediately if it hasn't already been pulled don't power it off, just cut its network access, so a proper forensic image can still be taken later.
 2. **Block the known-bad infrastructure** at the firewall and DNS resolver: `185.106.96.158`, `185.125.204.174`, `survmeter.live`, `securitybusinpuff.com`, `maldivehost.net`, and `attirenepal.com`.
 3. **Force a credential reset** for any accounts that were logged into that machine during the infection window, since we can't rule out the attacker grabbing stored credentials once they had a foothold.
-4. **Preserve a disk and memory image** of the host before any cleanup — the packet capture only shows us half the story, and we'll want to confirm exactly what ran and what it touched locally.
+4. **Preserve a disk and memory image** of the host before any cleanup. The packet capture only shows us half the story, and we'll want to confirm exactly what ran and what it touched locally.
 5. **Hand the spam traffic off to whoever owns mail security** to check whether `farshin@mailfa.com` reached other mailboxes, even though I couldn't confirm it's connected to the Cobalt Strike infection.
 
 **To stop this from happening again:**
