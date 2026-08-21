@@ -109,7 +109,7 @@ Domain Sid: S-1-5-21-3591857110-2884097990-301047963
 [+] Got OS info for 10.10.18.130 from srvinfo:
 ```
 
-This confirmed the host was part of a domain (not a workgroup) and returned the **NetBIOS domain name: `THM-AD`**. It's worth noting that `.local` is a commonly (and incorrectly) used TLD for internal AD domains — a detail that's often useful for identifying AD environments during recon on a wider network.
+This confirmed the host was part of a domain (not a workgroup) and returned the **NetBIOS domain name: `THM-AD`**. It's worth noting that `.local` is a commonly (and incorrectly) used TLD for internal AD domains, a detail that's often useful for identifying AD environments during recon on a wider network.
 
 ## Phase 3: Enumerating Users via Kerberos
 
@@ -139,11 +139,11 @@ Version: v1.0.3 (9dad6e1) - 10/30/25 - Ronnie Flathers @ropnop
 2025/10/30 17:12:12 >  [+] VALID USERNAME:       Darkstar@THM-AD
 ```
 
-This returned a list of valid usernames, including standard accounts like `james`, `robin`, and `administrator` — but two accounts stood out immediately as high-value targets: **`svc-admin`** and **`backup`**. Service accounts and accounts with "backup" in the name are classic AD misconfiguration red flags, often over-privileged or configured with weak/static passwords.
+This returned a list of valid usernames, including standard accounts like `james`, `robin`, and `administrator`. However, two accounts stood out immediately as high-value targets: **`svc-admin`** and **`backup`**. Service accounts and accounts with "backup" in the name are classic AD misconfiguration red flags, often over-privileged or configured with weak/static passwords.
 
 ## Phase 4: Abusing Kerberos — AS-REP Roasting
 
-Some accounts can be configured with Kerberos pre-authentication disabled — meaning anyone can request a ticket for that account without proving they know its password first. This is AS-REP Roasting. I checked `svc-admin` and confirmed it could be queried without a password:
+Some accounts can be configured with Kerberos pre-authentication disabled, meaning anyone can request a ticket for that account without proving they know its password first. This is AS-REP Roasting. I checked `svc-admin` and confirmed it could be queried without a password:
 
 ```bash
 python3 GetNPUsers.py THM-AD/svc-admin -no-pass -dc-ip 10.10.81.17
@@ -301,7 +301,7 @@ Info: Establishing connection to remote endpoint
 thm-ad\administrator
 ```
 
-This dropped me into a shell as `thm-ad\administrator` — full Domain Admin access.
+This dropped me into a shell as `thm-ad\administrator`, full Domain Admin access.
 
 ## Phase 8: Flag Capture
 
@@ -366,7 +366,7 @@ This room tied together an end-to-end AD attack chain that mirrors real-world en
 1. **Unauthenticated enumeration matters.** `enum4linux` and `kerbrute` gave up a domain name and valid usernames without needing a single credential.
 2. **AS-REP Roasting is a low-noise win.** Any account with Kerberos pre-auth disabled is crackable offline with zero interaction with the DC beyond the initial request.
 3. **Misconfigured shares leak credentials.** The `backup` share should never have been readable by a low-privileged service account, let alone contain plaintext credentials.
-4. **DCSync rights are dangerous in the wrong hands.** Any account with replication permissions is effectively equivalent to Domain Admin — this should be tightly scoped and monitored.
+4. **DCSync rights are dangerous in the wrong hands.** Any account with replication permissions is effectively equivalent to Domain Admin. This should be tightly scoped and monitored.
 5. **Pass-the-Hash means cracking isn't always necessary.** Once you have an NTLM hash, you may not need the plaintext password at all.
 
 From a defensive standpoint, this room is a strong case for enforcing Kerberos pre-authentication on all accounts, auditing share permissions regularly, and monitoring for DCSync-capable accounts and unusual replication requests.
